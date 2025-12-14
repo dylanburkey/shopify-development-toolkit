@@ -1,0 +1,190 @@
+---
+interface Product {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+  vendor?: string;
+}
+
+interface Props {
+  title?: string;
+  products?: Product[];
+  productsToShow?: number;
+  columnsDesktop?: number;
+  showViewAll?: boolean;
+  showSecondaryImage?: boolean;
+  showVendor?: boolean;
+  collectionUrl?: string;
+}
+
+const {
+  title = 'Featured Collection',
+  products = [],
+  productsToShow = 4,
+  columnsDesktop = 4,
+  showViewAll = true,
+  showSecondaryImage = false,
+  showVendor = false,
+  collectionUrl = '/collections/all',
+} = Astro.props;
+
+// Demo products for preview
+const demoProducts: Product[] = products.length > 0 ? products : [
+  { id: '1', title: 'Product 1', price: '$29.99', image: '', vendor: 'Brand A' },
+  { id: '2', title: 'Product 2', price: '$39.99', image: '', vendor: 'Brand B' },
+  { id: '3', title: 'Product 3', price: '$49.99', image: '', vendor: 'Brand A' },
+  { id: '4', title: 'Product 4', price: '$59.99', image: '', vendor: 'Brand C' },
+];
+
+const displayProducts = demoProducts.slice(0, productsToShow);
+
+const gridCols = {
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+  4: 'md:grid-cols-4',
+  5: 'md:grid-cols-5',
+};
+---
+
+<section class="py-12 px-8">
+  <div class="flex items-center justify-between mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">{title}</h2>
+    {showViewAll && (
+      <a href={collectionUrl} class="text-emerald-600 hover:text-emerald-700 font-medium">
+        View all
+      </a>
+    )}
+  </div>
+
+  <div class={`grid grid-cols-2 ${gridCols[columnsDesktop as keyof typeof gridCols] || 'md:grid-cols-4'} gap-6`}>
+    {displayProducts.map((product) => (
+      <div class="group">
+        <div class="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.title}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-gray-300">
+              <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          )}
+        </div>
+        {showVendor && product.vendor && (
+          <p class="text-xs text-gray-400 uppercase tracking-wide">{product.vendor}</p>
+        )}
+        <h3 class="font-medium text-gray-900 group-hover:text-emerald-600 transition-colors">{product.title}</h3>
+        <p class="text-gray-600">{product.price}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<!--
+  Shopify Liquid Template:
+
+  <section class="featured-collection">
+    <div class="featured-collection__header">
+      {%- if section.settings.title != blank -%}
+        <h2 class="featured-collection__title">{{ section.settings.title }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.show_view_all and section.settings.collection -%}
+        <a href="{{ section.settings.collection.url }}" class="featured-collection__view-all">
+          View all
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="featured-collection__products grid grid-cols-{{ section.settings.columns_desktop }}">
+      {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+        <div class="product-card">
+          <div class="product-card__media">
+            {%- if product.featured_media -%}
+              {{ product.featured_media | image_url: width: 400 | image_tag: loading: 'lazy' }}
+            {%- endif -%}
+
+            {%- if section.settings.show_secondary_image and product.media[1] -%}
+              {{ product.media[1] | image_url: width: 400 | image_tag: class: 'product-card__secondary-image', loading: 'lazy' }}
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.show_vendor -%}
+            <p class="product-card__vendor">{{ product.vendor }}</p>
+          {%- endif -%}
+
+          <h3 class="product-card__title">
+            <a href="{{ product.url }}">{{ product.title }}</a>
+          </h3>
+
+          <p class="product-card__price">{{ product.price | money }}</p>
+        </div>
+      {%- endfor -%}
+    </div>
+  </section>
+
+  {% schema %}
+  {
+    "name": "Featured Collection",
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Featured Collection"
+      },
+      {
+        "type": "collection",
+        "id": "collection",
+        "label": "Collection"
+      },
+      {
+        "type": "range",
+        "id": "products_to_show",
+        "label": "Maximum products to show",
+        "min": 2,
+        "max": 12,
+        "step": 1,
+        "default": 4
+      },
+      {
+        "type": "range",
+        "id": "columns_desktop",
+        "label": "Number of columns on desktop",
+        "min": 2,
+        "max": 5,
+        "step": 1,
+        "default": 4
+      },
+      {
+        "type": "checkbox",
+        "id": "show_view_all",
+        "label": "Show 'View all' button",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_secondary_image",
+        "label": "Show second image on hover",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "Show vendor",
+        "default": false
+      }
+    ],
+    "presets": [
+      {
+        "name": "Featured Collection"
+      }
+    ]
+  }
+  {% endschema %}
+-->

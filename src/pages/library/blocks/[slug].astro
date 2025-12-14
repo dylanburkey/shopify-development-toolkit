@@ -1,0 +1,108 @@
+---
+import Dashboard from '../../../layouts/Dashboard.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const blocks = await getCollection('blocks');
+  return blocks.map((block) => ({
+    params: { slug: block.data.slug },
+    props: { block },
+  }));
+}
+
+const { block } = Astro.props;
+
+// Generate Liquid block schema
+function generateBlockSchema(blockData: typeof block.data) {
+  return JSON.stringify({
+    type: blockData.slug,
+    name: blockData.name,
+    settings: blockData.settings,
+  }, null, 2);
+}
+
+const blockSchema = generateBlockSchema(block.data);
+---
+
+<Dashboard title={block.data.name} activeNav="blocks">
+  <div class="mb-6">
+    <a href="/library/blocks" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Blocks
+    </a>
+
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold text-gray-900">{block.data.name}</h1>
+          <span class="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full capitalize">{block.data.category}</span>
+        </div>
+        <p class="text-gray-600">{block.data.description || 'No description'}</p>
+      </div>
+      <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+        Add to Section
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Settings Panel -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-900">Settings ({block.data.settings.length})</h2>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {block.data.settings.length === 0 ? (
+          <div class="p-6 text-center text-gray-500">
+            <p>No settings configured.</p>
+          </div>
+        ) : (
+          block.data.settings.map((setting) => (
+            <div class="px-6 py-4">
+              <div class="flex items-center justify-between mb-1">
+                <p class="font-medium text-gray-900">{setting.label}</p>
+                <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded font-mono">{setting.type}</span>
+              </div>
+              <p class="text-sm text-gray-500">ID: {setting.id}</p>
+              {setting.default && (
+                <p class="text-sm text-gray-400 mt-1">Default: {String(setting.default)}</p>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+
+    <!-- Block Schema -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Block Schema</h2>
+        <button
+          onclick="navigator.clipboard.writeText(document.getElementById('block-schema').textContent)"
+          class="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+        >
+          Copy
+        </button>
+      </div>
+      <div class="p-6">
+        <pre id="block-schema" class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code>{blockSchema}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Example -->
+  <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Usage Example</h2>
+    </div>
+    <div class="p-6">
+      <p class="text-gray-600 mb-4">Add this block to any section's blocks array to enable it:</p>
+      <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code>{`{
+  "type": "${block.data.slug}",
+  "name": "${block.data.name}"
+}`}</code></pre>
+    </div>
+  </div>
+</Dashboard>

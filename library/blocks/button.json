@@ -1,0 +1,25 @@
+{
+  "name": "Button",
+  "slug": "button",
+  "description": "A clickable button with link",
+  "category": "interactive",
+  "settings": [
+    {
+      "id": "button_label",
+      "type": "text",
+      "label": "Button label",
+      "default": "Button"
+    },
+    {
+      "id": "button_link",
+      "type": "url",
+      "label": "Button link"
+    },
+    {
+      "id": "button_style",
+      "type": "select",
+      "label": "Button style",
+      "default": "primary"
+    }
+  ]
+}

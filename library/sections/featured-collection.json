@@ -1,0 +1,66 @@
+{
+  "name": "Featured Collection",
+  "slug": "featured-collection",
+  "description": "Display products from a selected collection in a grid",
+  "category": "collection",
+  "settings": [
+    {
+      "id": "title",
+      "type": "text",
+      "label": "Heading",
+      "default": "Featured Collection"
+    },
+    {
+      "id": "collection",
+      "type": "collection",
+      "label": "Collection"
+    },
+    {
+      "id": "products_to_show",
+      "type": "range",
+      "label": "Maximum products to show",
+      "default": 4
+    },
+    {
+      "id": "columns_desktop",
+      "type": "range",
+      "label": "Number of columns on desktop",
+      "default": 4
+    },
+    {
+      "id": "show_view_all",
+      "type": "checkbox",
+      "label": "Show 'View all' button",
+      "default": true
+    },
+    {
+      "id": "show_secondary_image",
+      "type": "checkbox",
+      "label": "Show second image on hover",
+      "default": false
+    },
+    {
+      "id": "show_vendor",
+      "type": "checkbox",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "id": "show_rating",
+      "type": "checkbox",
+      "label": "Show product rating",
+      "default": false
+    }
+  ],
+  "blocks": [],
+  "maxBlocks": 0,
+  "presets": [
+    {
+      "name": "Featured Collection",
+      "settings": {
+        "title": "Featured Collection",
+        "products_to_show": 4
+      }
+    }
+  ]
+}

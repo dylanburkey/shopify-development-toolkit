@@ -1,0 +1,37 @@
+{
+  "name": "FAQ",
+  "slug": "faq",
+  "description": "Frequently asked questions metaobject",
+  "type": "faq",
+  "fields": [
+    {
+      "key": "question",
+      "name": "Question",
+      "type": "single_line_text_field",
+      "required": true
+    },
+    {
+      "key": "answer",
+      "name": "Answer",
+      "type": "multi_line_text_field",
+      "required": true
+    },
+    {
+      "key": "category",
+      "name": "Category",
+      "type": "single_line_text_field",
+      "required": false
+    },
+    {
+      "key": "order",
+      "name": "Display Order",
+      "type": "number_integer",
+      "required": false
+    }
+  ],
+  "capabilities": {
+    "publishable": true,
+    "translatable": true,
+    "onlineStore": false
+  }
+}

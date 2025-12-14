@@ -1,0 +1,67 @@
+---
+import Dashboard from '../../../layouts/Dashboard.astro';
+import { getCollection } from 'astro:content';
+
+const metaobjects = await getCollection('metaobjects');
+---
+
+<Dashboard title="Metaobjects" activeNav="metaobjects">
+  <div class="mb-6">
+    <a href="/library" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Library
+    </a>
+    <p class="text-gray-600">Reusable metaobject definitions for Shopify stores.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {metaobjects.map((metaobject) => (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all overflow-hidden">
+        <div class="h-24 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+          <svg class="w-10 h-10 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+          </svg>
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-gray-900 mb-1">{metaobject.data.name}</h3>
+          <p class="text-sm text-gray-500 mb-3">{metaobject.data.description || 'No description'}</p>
+
+          <div class="space-y-2">
+            <p class="text-xs font-medium text-gray-400 uppercase">Fields</p>
+            <div class="flex flex-wrap gap-1">
+              {metaobject.data.fields.map((field) => (
+                <span class="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">{field.name}</span>
+              ))}
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="flex gap-2">
+              {metaobject.data.capabilities.publishable && (
+                <span class="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded">Publishable</span>
+              )}
+              {metaobject.data.capabilities.translatable && (
+                <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded">Translatable</span>
+              )}
+            </div>
+            <button class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">View</button>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {metaobjects.length === 0 && (
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+      <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No metaobjects yet</h3>
+      <p class="text-gray-500">Create metaobject definitions for reusable structured data.</p>
+    </div>
+  )}
+</Dashboard>

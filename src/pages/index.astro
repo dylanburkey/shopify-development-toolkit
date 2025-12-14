@@ -1,0 +1,156 @@
+---
+import Dashboard from '../layouts/Dashboard.astro';
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+const sections = await getCollection('sections');
+const blocks = await getCollection('blocks');
+
+const activeProjects = projects.filter(p => p.data.status === 'active');
+---
+
+<Dashboard title="Dashboard" activeNav="dashboard">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Total Projects</p>
+          <p class="text-2xl font-bold text-gray-900">{projects.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Active Projects</p>
+          <p class="text-2xl font-bold text-gray-900">{activeProjects.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Sections</p>
+          <p class="text-2xl font-bold text-gray-900">{sections.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Blocks</p>
+          <p class="text-2xl font-bold text-gray-900">{blocks.length}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Recent Projects</h2>
+        <a href="/projects" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">View all</a>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {projects.length === 0 ? (
+          <div class="p-6 text-center text-gray-500">
+            <p>No projects yet.</p>
+            <a href="/projects/new" class="text-emerald-600 hover:text-emerald-700 font-medium">Create your first project</a>
+          </div>
+        ) : (
+          projects.slice(0, 5).map((project) => (
+            <a href={`/projects/${project.data.slug}`} class="block px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="font-medium text-gray-900">{project.data.name}</h3>
+                  <p class="text-sm text-gray-500">{project.data.description || 'No description'}</p>
+                </div>
+                <span class:list={[
+                  'px-2 py-1 text-xs font-medium rounded-full',
+                  project.data.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                  project.data.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-gray-100 text-gray-700'
+                ]}>
+                  {project.data.status}
+                </span>
+              </div>
+            </a>
+          ))
+        )}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Component Library</h2>
+        <a href="/library" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Browse all</a>
+      </div>
+      <div class="p-6 grid grid-cols-3 gap-4">
+        <a href="/library/sections" class="text-center p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+          <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-900">{sections.length} Sections</p>
+        </a>
+        <a href="/library/blocks" class="text-center p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4" />
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-900">{blocks.length} Blocks</p>
+        </a>
+        <a href="/library/metaobjects" class="text-center p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7" />
+            </svg>
+          </div>
+          <p class="text-sm font-medium text-gray-900">Metaobjects</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-xl font-semibold mb-1">Quick Start</h2>
+        <p class="text-emerald-100">Create a new project or browse the component library to get started.</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/projects/new" class="px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-emerald-50 transition-colors">
+          New Project
+        </a>
+        <a href="/library" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors border border-emerald-400">
+          Browse Library
+        </a>
+      </div>
+    </div>
+  </div>
+</Dashboard>

@@ -1,0 +1,192 @@
+---
+import Dashboard from '../../../layouts/Dashboard.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { project: project.data.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const sections = await getCollection('sections');
+const blocks = await getCollection('blocks');
+
+// Filter to only sections/blocks used in this project
+const projectSections = sections.filter(s => project.data.sections.includes(s.data.slug));
+const projectBlocks = blocks.filter(b => project.data.blocks.includes(b.data.slug));
+---
+
+<Dashboard title={project.data.name} activeNav="projects">
+  <div class="mb-6">
+    <a href="/projects" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      Back to Projects
+    </a>
+
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold text-gray-900">{project.data.name}</h1>
+          <span class:list={[
+            'px-2 py-1 text-xs font-medium rounded-full',
+            project.data.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+            project.data.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+            'bg-gray-100 text-gray-700'
+          ]}>
+            {project.data.status}
+          </span>
+        </div>
+        <p class="text-gray-600">{project.data.description || 'No description'}</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+          Edit
+        </button>
+        <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+          Export Theme
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Sections</p>
+          <p class="text-xl font-bold text-gray-900">{projectSections.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Blocks</p>
+          <p class="text-xl font-bold text-gray-900">{projectBlocks.length}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Base Theme</p>
+          <p class="text-xl font-bold text-gray-900 capitalize">{project.data.baseTheme}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Sections</h2>
+        <button class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Add Section</button>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {projectSections.length === 0 ? (
+          <div class="p-6 text-center text-gray-500">
+            <p>No sections added yet.</p>
+          </div>
+        ) : (
+          projectSections.map((section) => (
+            <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium text-gray-900">{section.data.name}</h3>
+                  <p class="text-sm text-gray-500">{section.data.category}</p>
+                </div>
+              </div>
+              <a href={`/library/sections/${section.data.slug}`} class="text-sm text-gray-400 hover:text-gray-600">
+                View
+              </a>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Blocks</h2>
+        <button class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Add Block</button>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {projectBlocks.length === 0 ? (
+          <div class="p-6 text-center text-gray-500">
+            <p>No blocks added yet.</p>
+          </div>
+        ) : (
+          projectBlocks.map((block) => (
+            <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-orange-100 rounded flex items-center justify-center">
+                  <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-medium text-gray-900">{block.data.name}</h3>
+                  <p class="text-sm text-gray-500">{block.data.category}</p>
+                </div>
+              </div>
+              <a href={`/library/blocks/${block.data.slug}`} class="text-sm text-gray-400 hover:text-gray-600">
+                View
+              </a>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Project Details</h2>
+    </div>
+    <div class="p-6 grid grid-cols-2 gap-6">
+      <div>
+        <label class="text-sm font-medium text-gray-500">Store URL</label>
+        <p class="text-gray-900">{project.data.storeUrl || 'Not configured'}</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-500">Base Theme</label>
+        <p class="text-gray-900 capitalize">{project.data.baseTheme}</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-500">Created</label>
+        <p class="text-gray-900">{new Date(project.data.createdAt).toLocaleDateString()}</p>
+      </div>
+      <div>
+        <label class="text-sm font-medium text-gray-500">Last Updated</label>
+        <p class="text-gray-900">{new Date(project.data.updatedAt).toLocaleDateString()}</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

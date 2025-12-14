@@ -1,0 +1,66 @@
+{
+  "name": "Hero Banner",
+  "slug": "hero",
+  "description": "A full-width hero section with image background, heading, and CTA",
+  "category": "hero",
+  "settings": [
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "Background image"
+    },
+    {
+      "id": "image_overlay_opacity",
+      "type": "range",
+      "label": "Image overlay opacity",
+      "default": 40,
+      "info": "0 is transparent, 100 is opaque"
+    },
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "default": "Welcome to our store"
+    },
+    {
+      "id": "subheading",
+      "type": "richtext",
+      "label": "Subheading"
+    },
+    {
+      "id": "button_label",
+      "type": "text",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "id": "button_link",
+      "type": "url",
+      "label": "Button link"
+    },
+    {
+      "id": "height",
+      "type": "select",
+      "label": "Section height",
+      "default": "medium",
+      "info": "Height of the hero section"
+    },
+    {
+      "id": "content_alignment",
+      "type": "select",
+      "label": "Content alignment",
+      "default": "center"
+    }
+  ],
+  "blocks": [],
+  "maxBlocks": 0,
+  "presets": [
+    {
+      "name": "Hero Banner",
+      "settings": {
+        "heading": "Welcome to our store",
+        "button_label": "Shop now"
+      }
+    }
+  ]
+}

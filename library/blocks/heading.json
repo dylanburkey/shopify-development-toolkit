@@ -1,0 +1,20 @@
+{
+  "name": "Heading",
+  "slug": "heading",
+  "description": "A text heading block with customizable size and style",
+  "category": "text",
+  "settings": [
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "default": "Heading"
+    },
+    {
+      "id": "heading_size",
+      "type": "select",
+      "label": "Heading size",
+      "default": "h2"
+    }
+  ]
+}

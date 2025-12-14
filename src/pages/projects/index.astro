@@ -1,0 +1,73 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+---
+
+<Dashboard title="Projects" activeNav="projects">
+  <div class="flex items-center justify-between mb-6">
+    <p class="text-gray-600">Manage your Shopify theme projects</p>
+    <a href="/projects/new" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      New Project
+    </a>
+  </div>
+
+  {projects.length === 0 ? (
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
+      <p class="text-gray-500 mb-4">Get started by creating your first Shopify theme project.</p>
+      <a href="/projects/new" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors">
+        Create Project
+      </a>
+    </div>
+  ) : (
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((project) => (
+        <a href={`/projects/${project.data.slug}`} class="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all overflow-hidden group">
+          <div class="h-32 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
+            <svg class="w-12 h-12 text-gray-300 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+          </div>
+          <div class="p-4">
+            <div class="flex items-start justify-between mb-2">
+              <h3 class="font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">{project.data.name}</h3>
+              <span class:list={[
+                'px-2 py-0.5 text-xs font-medium rounded-full',
+                project.data.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                project.data.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-gray-100 text-gray-700'
+              ]}>
+                {project.data.status}
+              </span>
+            </div>
+            <p class="text-sm text-gray-500 mb-3 line-clamp-2">{project.data.description || 'No description'}</p>
+            <div class="flex items-center gap-4 text-xs text-gray-400">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z" />
+                </svg>
+                {project.data.sections.length} sections
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4" />
+                </svg>
+                {project.data.blocks.length} blocks
+              </span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</Dashboard>

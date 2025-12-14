@@ -1,0 +1,70 @@
+{
+  "name": "Image with Text",
+  "slug": "image-with-text",
+  "description": "A section with an image alongside text content",
+  "category": "content",
+  "settings": [
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "Image"
+    },
+    {
+      "id": "image_width",
+      "type": "select",
+      "label": "Image width",
+      "default": "medium"
+    },
+    {
+      "id": "layout",
+      "type": "select",
+      "label": "Desktop layout",
+      "default": "image_first"
+    },
+    {
+      "id": "heading",
+      "type": "text",
+      "label": "Heading",
+      "default": "Image with text"
+    },
+    {
+      "id": "text",
+      "type": "richtext",
+      "label": "Text",
+      "default": "<p>Pair text with an image to focus on your chosen product, collection, or blog post.</p>"
+    },
+    {
+      "id": "button_label",
+      "type": "text",
+      "label": "Button label"
+    },
+    {
+      "id": "button_link",
+      "type": "url",
+      "label": "Button link"
+    },
+    {
+      "id": "content_alignment",
+      "type": "select",
+      "label": "Content alignment",
+      "default": "left"
+    },
+    {
+      "id": "color_scheme",
+      "type": "select",
+      "label": "Color scheme",
+      "default": "background-1"
+    }
+  ],
+  "blocks": [],
+  "maxBlocks": 0,
+  "presets": [
+    {
+      "name": "Image with Text",
+      "settings": {
+        "heading": "Image with text",
+        "layout": "image_first"
+      }
+    }
+  ]
+}
