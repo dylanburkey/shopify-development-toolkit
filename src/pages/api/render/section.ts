@@ -1,7 +1,10 @@
 import type { APIRoute } from 'astro';
 import { renderSection } from '../../../lib/liquid';
+import { trackApiRequest, trackSectionRender } from '../../../lib/sentry';
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const startTime = Date.now();
+
   try {
     const body = await request.json();
     const { sectionSlug, presetSlug, customSettings, skipCache } = body as {
@@ -31,6 +34,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       skipCache: skipCache ?? false,
     });
 
+    // Track metrics
+    const durationMs = Date.now() - startTime;
+    trackApiRequest('/api/render/section', 'POST', 200, durationMs);
+    trackSectionRender(sectionSlug, result.renderTimeMs, result.cached);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -53,6 +61,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Render API error:', error);
+
+    // Track failed request
+    const durationMs = Date.now() - startTime;
+    trackApiRequest('/api/render/section', 'POST', 500, durationMs);
 
     return new Response(
       JSON.stringify({

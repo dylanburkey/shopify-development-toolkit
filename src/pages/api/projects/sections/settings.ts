@@ -1,7 +1,10 @@
 import type { APIRoute } from 'astro';
 import { getDB } from '../../../../lib/db';
+import { trackApiRequest, trackUserAction, trackDbQuery } from '../../../../lib/sentry';
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const startTime = Date.now();
+
   try {
     const body = await request.json();
     const { projectSlug, sectionId, settings } = body;
@@ -58,6 +61,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Update section settings
     const settingsJson = JSON.stringify(settings);
 
+    const dbStartTime = Date.now();
     await db
       .prepare('UPDATE project_sections SET settings = ? WHERE id = ?')
       .bind(settingsJson, sectionId)
@@ -68,6 +72,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .prepare('UPDATE projects SET updated_at = ? WHERE id = ?')
       .bind(new Date().toISOString(), project.id)
       .run();
+
+    const dbDuration = Date.now() - dbStartTime;
+    trackDbQuery('update_section_settings', dbDuration, true);
+
+    // Track metrics
+    const durationMs = Date.now() - startTime;
+    trackApiRequest('/api/projects/sections/settings', 'POST', 200, durationMs);
+    trackUserAction('save_section_settings', `${section.section_slug}`);
 
     return new Response(
       JSON.stringify({
@@ -80,6 +92,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   } catch (error) {
     console.error('Save settings error:', error);
+
+    // Track failed request
+    const durationMs = Date.now() - startTime;
+    trackApiRequest('/api/projects/sections/settings', 'POST', 500, durationMs);
+
     return new Response(
       JSON.stringify({
         success: false,
