@@ -1,0 +1,27 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Blocks" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      Blocks are reusable units inside sections. Block definitions live in <code class="px-1 py-0.5 bg-gray-100 rounded">library/blocks</code>.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">How it works</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Blocks define their settings schema and a category for browsing.</p>
+        <p>Sections opt into blocks by type and can limit counts.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Keep blocks focused: one responsibility, minimal settings.</p>
+        <p>Prefer composition over bloated block types.</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

@@ -1,0 +1,31 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+
+const sections = [
+  { name: 'Overview', href: '/docs/overview', description: 'High-level mental model and how the toolkit fits together.' },
+  { name: 'Themes', href: '/docs/themes', description: 'Theme concepts, “purchase” links, and how reference themes relate to the builder.' },
+  { name: 'Projects', href: '/docs/projects', description: 'Project lifecycle, D1 data model, and core workflows.' },
+  { name: 'Library', href: '/docs/library', description: 'Sections, blocks, presets, metaobjects and how they are sourced.' },
+  { name: 'Sections', href: '/docs/sections', description: 'Section schema, settings, variants, and best practices.' },
+  { name: 'Blocks', href: '/docs/blocks', description: 'Block schema and composition patterns.' },
+  { name: 'Presets', href: '/docs/presets', description: 'Theme presets: what they are and how to apply them.' },
+  { name: 'Preview', href: '/docs/preview', description: 'Live preview architecture and troubleshooting.' },
+  { name: 'Export', href: '/docs/export', description: 'How ZIP export works and what gets generated.' },
+  { name: 'Deployment', href: '/docs/deployment', description: 'Cloudflare Workers, Wrangler, and D1 migrations.' },
+];
+---
+
+<Dashboard title="Docs" activeNav="docs">
+  <div class="mb-6">
+    <p class="text-gray-600">How the toolkit works, recommended workflows, and best practices.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {sections.map((item) => (
+      <a href={item.href} class="bg-white rounded-xl shadow-sm border border-gray-200 hover:border-emerald-300 hover:shadow-md transition-all p-6">
+        <h3 class="font-semibold text-gray-900 mb-2">{item.name}</h3>
+        <p class="text-sm text-gray-600">{item.description}</p>
+      </a>
+    ))}
+  </div>
+</Dashboard>

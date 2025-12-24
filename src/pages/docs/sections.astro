@@ -1,0 +1,29 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Sections" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      Sections are the primary building blocks of Shopify themes.
+      In this toolkit, section definitions are stored as JSON schemas in <code class="px-1 py-0.5 bg-gray-100 rounded">library/sections</code>.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">How it works</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>A section definition includes metadata (name, slug, category) and a settings schema.</p>
+        <p>Blocks can be allowed/limited per section and have their own settings schema.</p>
+        <p>The settings UI is generated from the schema.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Prefer explicit defaults so previews and exports are deterministic.</p>
+        <p>Keep settings IDs stable; changing IDs can orphan saved project settings.</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

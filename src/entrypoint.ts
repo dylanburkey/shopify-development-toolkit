@@ -20,6 +20,16 @@ export function createExports(manifest: SSRManifest) {
       release: env.CF_VERSION_METADATA?.id,
       sendDefaultPii: true,
       tracesSampleRate: 1.0,
+
+      // Enable Sentry Logging
+      enableLogs: true,
+
+      // Capture console.error() calls automatically
+      integrations: [
+        Sentry.consoleLoggingIntegration({
+          levels: ["error"],
+        }),
+      ],
     }),
     { fetch } satisfies ExportedHandler<Env>
   );

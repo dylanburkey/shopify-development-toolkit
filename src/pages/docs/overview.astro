@@ -1,0 +1,31 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Overview" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      This toolkit is a Shopify theme builder deployed on Cloudflare Workers using Astro SSR.
+      It combines a static component library (sections/blocks/metaobjects/presets) with a project system stored in D1.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Core concepts</h2>
+      <div class="space-y-2 text-gray-700">
+        <p><span class="font-medium">Projects</span> are the source of truth and live in D1.</p>
+        <p><span class="font-medium">Library</span> content is read-only and loaded via Astro content collections from the <code class="px-1 py-0.5 bg-gray-100 rounded">library/</code> directory.</p>
+        <p><span class="font-medium">Preview</span> renders sections in an iframe with live updates.</p>
+        <p><span class="font-medium">Export</span> generates a Shopify theme ZIP using <code class="px-1 py-0.5 bg-gray-100 rounded">fflate</code>.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Keep library definitions backwards compatible; projects reference them over time.</p>
+        <p>Use stable slugs. Changing slugs can break references.</p>
+        <p>Prefer small, composable blocks and sections with a clear responsibility.</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

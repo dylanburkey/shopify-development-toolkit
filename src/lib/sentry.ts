@@ -1,9 +1,42 @@
 /**
- * Sentry utilities for metrics and error tracking
- * Import this module to track metrics across the application
+ * Sentry utilities for metrics, error tracking, and logging
+ * Import this module to track metrics and logs across the application
  */
 
 import * as Sentry from '@sentry/cloudflare';
+
+/**
+ * Structured Logging Utilities
+ * Use these for explicit log messages with structured attributes
+ */
+
+/**
+ * Log an informational message
+ */
+export function logInfo(message: string, attributes?: Record<string, unknown>) {
+  Sentry.logger.info(message, attributes);
+}
+
+/**
+ * Log a warning message
+ */
+export function logWarning(message: string, attributes?: Record<string, unknown>) {
+  Sentry.logger.warn(message, attributes);
+}
+
+/**
+ * Log an error message
+ */
+export function logError(message: string, attributes?: Record<string, unknown>) {
+  Sentry.logger.error(message, attributes);
+}
+
+/**
+ * Log a debug message
+ */
+export function logDebug(message: string, attributes?: Record<string, unknown>) {
+  Sentry.logger.debug(message, attributes);
+}
 
 /**
  * Track a counter metric (increments)

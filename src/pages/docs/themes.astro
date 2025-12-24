@@ -1,0 +1,35 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Themes" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      The <a class="text-emerald-600 hover:text-emerald-700" href="/themes">Themes</a> section is a curated list of themes you can use as
+      references and/or acquisition targets.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">How “purchase” works</h2>
+      <p class="text-gray-700">
+        Currently, “purchase” is an external link. This avoids building payments, licensing, and account management into the toolkit.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Reference themes</h2>
+      <p class="text-gray-700">
+        The repository includes a <code class="px-1 py-0.5 bg-gray-100 rounded">themes/</code> directory used for reference and syncing patterns.
+        For example, <code class="px-1 py-0.5 bg-gray-100 rounded">themes/forge-industrial</code> can be used to derive or validate section schemas.
+      </p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Keep “Themes” lightweight: it should point users to reputable sources and internal guidance.</p>
+        <p>Document what each theme is used for (reference, baseline, inspiration, etc.).</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

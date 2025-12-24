@@ -8,7 +8,9 @@ const { activeNav = 'dashboard' } = Astro.props;
 const navigation = [
   { name: 'Dashboard', href: '/', icon: 'home', id: 'dashboard' },
   { name: 'Projects', href: '/projects', icon: 'folder', id: 'projects' },
+  { name: 'Themes', href: '/themes', icon: 'sparkles', id: 'themes' },
   { name: 'Component Library', href: '/library', icon: 'cube', id: 'library' },
+  { name: 'Docs', href: '/docs', icon: 'book', id: 'docs' },
 ];
 
 const secondaryNav = [
@@ -55,9 +57,19 @@ const secondaryNav = [
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
           </svg>
         )}
+        {item.icon === 'sparkles' && (
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l1.5 4.5L11 9l-4.5 1.5L5 15l-1.5-4.5L-1 9l4.5-1.5L5 3zM16 6l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3zM14 14l1.5 4.5L20 20l-4.5 1.5L14 26l-1.5-4.5L8 20l4.5-1.5L14 14z" />
+          </svg>
+        )}
         {item.icon === 'cube' && (
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        )}
+        {item.icon === 'book' && (
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.5c-1.5-1.1-3.4-1.7-5.5-1.7H4v14h2.5c2.1 0 4 .6 5.5 1.7m0-13.7c1.5-1.1 3.4-1.7 5.5-1.7H20v14h-2.5c-2.1 0-4 .6-5.5 1.7m0-13.7v13.7" />
           </svg>
         )}
         {item.name}

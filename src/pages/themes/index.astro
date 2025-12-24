@@ -1,0 +1,70 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+
+type Theme = {
+  name: string;
+  slug: string;
+  description: string;
+  purchaseUrl: string;
+};
+
+const themes: Theme[] = [
+  {
+    name: 'Forge Industrial',
+    slug: 'forge-industrial',
+    description: 'Industrial, content-forward reference theme used to seed sections and patterns.',
+    purchaseUrl: 'https://themes.shopify.com',
+  },
+];
+---
+
+<Dashboard title="Themes" activeNav="themes">
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <p class="text-gray-600">Browse available themes and purchase from the source.</p>
+    </div>
+    <a
+      href="https://themes.shopify.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+    >
+      Browse Shopify Theme Store
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {themes.map((theme) => (
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="h-32 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">
+          <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z" />
+          </svg>
+        </div>
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-4 mb-2">
+            <h3 class="font-semibold text-gray-900">{theme.name}</h3>
+            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-700">{theme.slug}</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">{theme.description}</p>
+          <div class="flex items-center gap-3">
+            <a
+              href={theme.purchaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+            >
+              Purchase
+            </a>
+            <a
+              href="/docs/themes"
+              class="inline-flex items-center justify-center px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              How themes work
+            </a>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</Dashboard>

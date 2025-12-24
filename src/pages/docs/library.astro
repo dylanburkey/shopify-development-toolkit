@@ -1,0 +1,29 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Library" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      The library is a static catalog of sections, blocks, presets, and metaobjects.
+      These are loaded as Astro content collections from the <code class="px-1 py-0.5 bg-gray-100 rounded">library/</code> directory.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">How it works</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Definitions live in JSON files under <code class="px-1 py-0.5 bg-gray-100 rounded">library/</code>.</p>
+        <p>The app uses <code class="px-1 py-0.5 bg-gray-100 rounded">getCollection()</code> to browse these items in UI.</p>
+        <p>Projects reference library items by slug/type. Keep those identifiers stable.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Write schemas that are forward-compatible; add new fields instead of changing meaning.</p>
+        <p>Keep settings arrays ordered and predictable for the UI form generator.</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>

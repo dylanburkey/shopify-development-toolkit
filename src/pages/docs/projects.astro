@@ -1,0 +1,28 @@
+---
+import Dashboard from '../../layouts/Dashboard.astro';
+---
+
+<Dashboard title="Docs: Projects" activeNav="docs">
+  <div class="max-w-3xl space-y-4">
+    <p class="text-gray-700">
+      Projects represent a theme-in-progress. They are stored in D1 and are the source of truth.
+    </p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">How it works</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Projects are created from the Projects UI and stored in D1.</p>
+        <p>Adding sections/blocks creates records linking project state to library definitions.</p>
+        <p>Settings changes persist to D1 and should be reflected in preview and export.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Best practices</h2>
+      <div class="space-y-2 text-gray-700">
+        <p>Validate input at API boundaries; never trust client payloads.</p>
+        <p>Prefer migrations over ad-hoc schema drift in D1.</p>
+      </div>
+    </div>
+  </div>
+</Dashboard>
