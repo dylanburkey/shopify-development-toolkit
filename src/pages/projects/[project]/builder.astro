@@ -1,6 +1,7 @@
 ---
 import Dashboard from '../../../layouts/Dashboard.astro';
 import BuilderCanvas from '../../../components/builder/BuilderCanvas.astro';
+import SchemaEditor from '../../../components/builder/SchemaEditor.astro';
 import { getProject, getProjectSections } from '../../../lib/project/create';
 import { getCollection } from 'astro:content';
 import { listAllPresets } from '../../../lib/presets/apply';
@@ -55,7 +56,62 @@ const allPresets = await listAllPresets(Astro.locals);
     appliedPreset={project.appliedPreset}
     availablePresets={allPresets}
   />
+
+  <!-- Schema Editor Modal -->
+  <SchemaEditor
+    sectionId={0}
+    sectionSlug=""
+    projectSlug={project.slug}
+  />
 </Dashboard>
+
+<script>
+  // Handle schema editor button clicks
+  document.addEventListener('click', async (e) => {
+    const schemaBtn = (e.target as HTMLElement).closest('.schema-btn');
+    if (!schemaBtn) return;
+
+    const sectionId = (schemaBtn as HTMLElement).dataset.sectionId;
+    const sectionSlug = (schemaBtn as HTMLElement).dataset.sectionSlug;
+    const projectSlug = (schemaBtn as HTMLElement).dataset.projectSlug;
+
+    if (!sectionId || !sectionSlug || !projectSlug) {
+      console.error('Missing required data attributes');
+      return;
+    }
+
+    // Fetch current schema (custom or library)
+    try {
+      const response = await fetch(`/api/projects/sections/schema?project=${projectSlug}&sectionId=${sectionId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the schema editor with the current schema
+        const textarea = document.getElementById('schema-editor-textarea') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.value = JSON.stringify(data.schema, null, 2);
+          textarea.dataset.sectionId = sectionId;
+          textarea.dataset.sectionSlug = sectionSlug;
+          textarea.dataset.projectSlug = projectSlug;
+
+          // Update line numbers
+          const event = new Event('input');
+          textarea.dispatchEvent(event);
+        }
+
+        // Open the modal
+        if ((window as any).schemaEditor) {
+          (window as any).schemaEditor.open();
+        }
+      } else {
+        alert('Failed to load schema: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Failed to load schema:', error);
+      alert('Failed to load schema');
+    }
+  });
+</script>
 
 <style>
   /* Additional builder page styles */

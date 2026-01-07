@@ -186,8 +186,11 @@ const { projectSlug } = Astro.props;
     `;
 
     try {
-      // Fetch section schema from content collection via API (with sectionId for current settings)
-      const response = await fetch(`/api/library/section-schema?slug=${sectionSlug}&sectionId=${currentSectionId}`);
+      const projectSlug = panel.dataset.projectSlug;
+
+      // Fetch section schema (custom or library) from project API
+      // This will return custom schema if it exists, otherwise library schema
+      const response = await fetch(`/api/projects/sections/schema?project=${projectSlug}&sectionId=${currentSectionId}`);
 
       if (!response.ok) {
         throw new Error('Failed to load section schema');
@@ -195,7 +198,15 @@ const { projectSlug } = Astro.props;
 
       const data = await response.json();
       currentSchema = data.schema;
-      currentSettings = data.currentSettings || {};
+
+      // Fetch current settings separately
+      const settingsResponse = await fetch(`/api/library/section-schema?slug=${sectionSlug}&sectionId=${currentSectionId}`);
+      if (settingsResponse.ok) {
+        const settingsData = await settingsResponse.json();
+        currentSettings = settingsData.currentSettings || {};
+      } else {
+        currentSettings = {};
+      }
 
       renderSettingsForm();
     } catch (error) {

@@ -62,6 +62,18 @@ const { id, sectionSlug, name, category, description, position, projectSlug } = 
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     </button>
+    <button
+      type="button"
+      class="action-btn schema-btn"
+      data-section-id={id}
+      data-section-slug={sectionSlug}
+      data-project-slug={projectSlug}
+      title="Edit section schema"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+      </svg>
+    </button>
     <a
       href={`/library/sections/${sectionSlug}`}
       class="action-btn view-btn"

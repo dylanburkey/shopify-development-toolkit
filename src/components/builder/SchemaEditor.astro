@@ -1,0 +1,626 @@
+---
+/**
+ * SchemaEditor - Edit section schema definition (add/remove fields, change types)
+ * Allows customization of the schema on a per-project basis
+ */
+
+interface Props {
+  sectionId: number;
+  sectionSlug: string;
+  projectSlug: string;
+  initialSchema?: string; // JSON string of current schema
+}
+
+const { sectionId, sectionSlug, projectSlug, initialSchema } = Astro.props;
+---
+
+<div id="schema-editor-modal" class="schema-editor-modal hidden">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Edit Section Schema</h2>
+      <button type="button" class="close-btn" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="editor-notice">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <div>
+          <p class="notice-title">Custom Schema for This Project</p>
+          <p class="notice-text">Changes to the schema will only apply to this section in this project. The library section remains unchanged.</p>
+        </div>
+      </div>
+
+      <div class="editor-toolbar">
+        <button type="button" class="toolbar-btn" id="format-json-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
+          Format
+        </button>
+        <button type="button" class="toolbar-btn" id="validate-json-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          Validate
+        </button>
+        <button type="button" class="toolbar-btn" id="reset-schema-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+          </svg>
+          Reset to Library
+        </button>
+      </div>
+
+      <div class="editor-container">
+        <textarea
+          id="schema-editor-textarea"
+          class="schema-textarea"
+          data-section-id={sectionId}
+          data-section-slug={sectionSlug}
+          data-project-slug={projectSlug}
+          placeholder='{\n  "name": "Section Name",\n  "settings": [],\n  "blocks": [],\n  "max_blocks": 50,\n  "presets": []\n}'
+          spellcheck="false"
+        >{initialSchema || ''}</textarea>
+        <div class="line-numbers" id="line-numbers"></div>
+      </div>
+
+      <div class="validation-message hidden" id="validation-message"></div>
+
+      <div class="schema-help">
+        <details>
+          <summary>Schema Field Types</summary>
+          <div class="help-content">
+            <ul>
+              <li><code>text</code> - Single line text input</li>
+              <li><code>textarea</code> - Multi-line text input</li>
+              <li><code>richtext</code> - HTML rich text editor</li>
+              <li><code>checkbox</code> - Boolean toggle</li>
+              <li><code>select</code> - Dropdown with options</li>
+              <li><code>range</code> - Slider with min/max/step</li>
+              <li><code>color</code> - Color picker</li>
+              <li><code>url</code> - URL input</li>
+              <li><code>image_picker</code> - Image upload</li>
+              <li><code>video</code> - Video picker</li>
+              <li><code>article</code> - Article picker</li>
+              <li><code>blog</code> - Blog picker</li>
+              <li><code>collection</code> - Collection picker</li>
+              <li><code>product</code> - Product picker</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+      <button type="button" class="btn btn-primary save-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
+        Save Custom Schema
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  class SchemaEditorController {
+    private modal: HTMLElement;
+    private textarea: HTMLTextAreaElement;
+    private closeBtn: HTMLElement;
+    private cancelBtn: HTMLElement;
+    private saveBtn: HTMLElement;
+    private formatBtn: HTMLElement;
+    private validateBtn: HTMLElement;
+    private resetBtn: HTMLElement;
+    private validationMsg: HTMLElement;
+    private lineNumbers: HTMLElement;
+    private sectionId: string;
+    private sectionSlug: string;
+    private projectSlug: string;
+    private librarySchema: string | null = null;
+
+    constructor() {
+      this.modal = document.getElementById('schema-editor-modal') as HTMLElement;
+      this.textarea = document.getElementById('schema-editor-textarea') as HTMLTextAreaElement;
+      this.closeBtn = this.modal.querySelector('.close-btn') as HTMLElement;
+      this.cancelBtn = this.modal.querySelector('.cancel-btn') as HTMLElement;
+      this.saveBtn = this.modal.querySelector('.save-btn') as HTMLElement;
+      this.formatBtn = document.getElementById('format-json-btn') as HTMLElement;
+      this.validateBtn = document.getElementById('validate-json-btn') as HTMLElement;
+      this.resetBtn = document.getElementById('reset-schema-btn') as HTMLElement;
+      this.validationMsg = document.getElementById('validation-message') as HTMLElement;
+      this.lineNumbers = document.getElementById('line-numbers') as HTMLElement;
+
+      this.sectionId = this.textarea.dataset.sectionId || '';
+      this.sectionSlug = this.textarea.dataset.sectionSlug || '';
+      this.projectSlug = this.textarea.dataset.projectSlug || '';
+
+      this.init();
+    }
+
+    private init() {
+      // Bind events
+      this.closeBtn?.addEventListener('click', () => this.close());
+      this.cancelBtn?.addEventListener('click', () => this.close());
+      this.saveBtn?.addEventListener('click', () => this.save());
+      this.formatBtn?.addEventListener('click', () => this.formatJSON());
+      this.validateBtn?.addEventListener('click', () => this.validateJSON());
+      this.resetBtn?.addEventListener('click', () => this.resetToLibrary());
+
+      // Update line numbers on input
+      this.textarea?.addEventListener('input', () => this.updateLineNumbers());
+      this.textarea?.addEventListener('scroll', () => this.syncScroll());
+
+      // Close on overlay click
+      this.modal?.querySelector('.modal-overlay')?.addEventListener('click', () => this.close());
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !this.modal.classList.contains('hidden')) {
+          this.close();
+        }
+      });
+
+      // Initial line numbers
+      this.updateLineNumbers();
+
+      // Load library schema for reset
+      this.loadLibrarySchema();
+    }
+
+    async loadLibrarySchema() {
+      try {
+        const response = await fetch(`/api/library/section-schema?slug=${this.sectionSlug}`);
+        if (response.ok) {
+          const data = await response.json();
+          this.librarySchema = JSON.stringify(data.schema, null, 2);
+        }
+      } catch (error) {
+        console.error('Failed to load library schema:', error);
+      }
+    }
+
+    open() {
+      this.modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      this.updateLineNumbers();
+    }
+
+    close() {
+      this.modal.classList.add('hidden');
+      document.body.style.overflow = '';
+      this.clearValidation();
+    }
+
+    formatJSON() {
+      try {
+        const json = JSON.parse(this.textarea.value);
+        this.textarea.value = JSON.stringify(json, null, 2);
+        this.updateLineNumbers();
+        this.showValidation('JSON formatted successfully', 'success');
+      } catch (error) {
+        this.showValidation(error instanceof Error ? error.message : 'Invalid JSON', 'error');
+      }
+    }
+
+    validateJSON() {
+      try {
+        const json = JSON.parse(this.textarea.value);
+
+        // Basic schema validation
+        if (!json.name) {
+          throw new Error('Schema must have a "name" property');
+        }
+        if (!Array.isArray(json.settings)) {
+          throw new Error('Schema must have a "settings" array');
+        }
+        if (!Array.isArray(json.blocks)) {
+          throw new Error('Schema must have a "blocks" array');
+        }
+
+        // Validate settings
+        json.settings.forEach((setting: any, index: number) => {
+          if (!setting.id) throw new Error(`Setting ${index} missing "id"`);
+          if (!setting.type) throw new Error(`Setting ${index} missing "type"`);
+          if (!setting.label) throw new Error(`Setting ${index} missing "label"`);
+        });
+
+        // Validate blocks
+        json.blocks.forEach((block: any, index: number) => {
+          if (!block.type) throw new Error(`Block ${index} missing "type"`);
+          if (!block.name) throw new Error(`Block ${index} missing "name"`);
+          if (!Array.isArray(block.settings)) {
+            throw new Error(`Block ${index} must have "settings" array`);
+          }
+        });
+
+        this.showValidation('✓ Schema is valid', 'success');
+      } catch (error) {
+        this.showValidation(error instanceof Error ? error.message : 'Invalid schema', 'error');
+      }
+    }
+
+    async resetToLibrary() {
+      if (!confirm('Reset to library schema? This will discard your custom changes.')) {
+        return;
+      }
+
+      if (this.librarySchema) {
+        this.textarea.value = this.librarySchema;
+        this.updateLineNumbers();
+        this.showValidation('Reset to library schema', 'success');
+      } else {
+        this.showValidation('Library schema not available', 'error');
+      }
+    }
+
+    async save() {
+      // Validate before saving
+      try {
+        JSON.parse(this.textarea.value);
+      } catch (error) {
+        this.showValidation('Please fix JSON errors before saving', 'error');
+        return;
+      }
+
+      try {
+        this.saveBtn.disabled = true;
+        this.saveBtn.textContent = 'Saving...';
+
+        const response = await fetch('/api/projects/sections/schema', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectSlug: this.projectSlug,
+            sectionId: parseInt(this.sectionId),
+            customSchema: JSON.parse(this.textarea.value),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          this.showValidation('Custom schema saved successfully', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          throw new Error(data.error || 'Failed to save');
+        }
+      } catch (error) {
+        this.showValidation(error instanceof Error ? error.message : 'Failed to save', 'error');
+      } finally {
+        this.saveBtn.disabled = false;
+        this.saveBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Save Custom Schema
+        `;
+      }
+    }
+
+    private updateLineNumbers() {
+      const lines = this.textarea.value.split('\n').length;
+      this.lineNumbers.innerHTML = Array.from(
+        { length: lines },
+        (_, i) => `<div>${i + 1}</div>`
+      ).join('');
+    }
+
+    private syncScroll() {
+      this.lineNumbers.scrollTop = this.textarea.scrollTop;
+    }
+
+    private showValidation(message: string, type: 'success' | 'error') {
+      this.validationMsg.textContent = message;
+      this.validationMsg.className = `validation-message ${type}`;
+      this.validationMsg.classList.remove('hidden');
+    }
+
+    private clearValidation() {
+      this.validationMsg.classList.add('hidden');
+    }
+  }
+
+  // Initialize on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('schema-editor-modal')) {
+        (window as any).schemaEditor = new SchemaEditorController();
+      }
+    });
+  } else {
+    if (document.getElementById('schema-editor-modal')) {
+      (window as any).schemaEditor = new SchemaEditorController();
+    }
+  }
+</script>
+
+<style>
+  .schema-editor-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-content {
+    position: relative;
+    inline-size: 90vw;
+    max-inline-size: 900px;
+    max-block-size: 90vh;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-block-end: 1px solid #e2e8f0;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .close-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.15s;
+  }
+
+  .close-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .editor-notice {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 0.5rem;
+    margin-block-end: 1rem;
+  }
+
+  .editor-notice svg {
+    flex-shrink: 0;
+    color: #d97706;
+  }
+
+  .notice-title {
+    font-weight: 600;
+    color: #78350f;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .notice-text {
+    font-size: 0.875rem;
+    color: #92400e;
+    margin: 0;
+  }
+
+  .editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-block-end: 1rem;
+  }
+
+  .toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.15s;
+  }
+
+  .toolbar-btn:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+
+  .editor-container {
+    position: relative;
+    display: flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #1e293b;
+  }
+
+  .line-numbers {
+    padding: 1rem 0.5rem;
+    background: #0f172a;
+    color: #64748b;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: end;
+    user-select: none;
+    overflow: hidden;
+    min-inline-size: 3rem;
+  }
+
+  .schema-textarea {
+    flex: 1;
+    inline-size: 100%;
+    min-block-size: 400px;
+    max-block-size: 600px;
+    padding: 1rem;
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background: #1e293b;
+    color: #e2e8f0;
+    border: none;
+    outline: none;
+    resize: vertical;
+    tab-size: 2;
+  }
+
+  .schema-textarea::selection {
+    background: #3b82f6;
+  }
+
+  .validation-message {
+    margin-block-start: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+  }
+
+  .validation-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
+  }
+
+  .validation-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+  }
+
+  .schema-help {
+    margin-block-start: 1rem;
+  }
+
+  .schema-help details {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .schema-help summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #475569;
+    user-select: none;
+  }
+
+  .help-content {
+    margin-block-start: 0.75rem;
+    padding-inline-start: 0.5rem;
+  }
+
+  .help-content ul {
+    margin: 0;
+    padding-inline-start: 1.5rem;
+    columns: 2;
+    gap: 1rem;
+  }
+
+  .help-content li {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-block-end: 0.25rem;
+  }
+
+  .help-content code {
+    color: #2563eb;
+    font-family: monospace;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-block-start: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+  }
+
+  .btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #1d4ed8;
+  }
+
+  .btn-primary:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>

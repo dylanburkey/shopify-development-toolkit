@@ -18,7 +18,8 @@ export interface ProjectSectionRow {
   project_id: string;
   section_slug: string;
   position: number;
-  settings: string; // JSON string of section settings
+  settings: string; // JSON string of section settings (setting values)
+  custom_schema: string | null; // JSON string of custom schema definition (field definitions)
   added_at: string;
 }
 
