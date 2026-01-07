@@ -1,0 +1,800 @@
+---
+/**
+ * LibrarySettingsPreview - Editable settings panel for library section preview
+ * Allows temporary customization of section settings without saving to database
+ */
+
+interface Setting {
+  id: string;
+  type: string;
+  label: string;
+  default?: unknown;
+  info?: string;
+  options?: { value: string; label: string }[];
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  placeholder?: string;
+}
+
+interface Props {
+  sectionSlug: string;
+  settings: Setting[];
+  presetSlug?: string;
+}
+
+const { sectionSlug, settings, presetSlug } = Astro.props;
+---
+
+<div class="library-settings-preview" data-section-slug={sectionSlug} data-preset-slug={presetSlug || ''}>
+  <!-- Preview Panel -->
+  <div class="preview-panel">
+    <div class="preview-header">
+      <h3 class="preview-title">Live Preview</h3>
+      <div class="preview-controls">
+        <button type="button" class="viewport-btn active" data-viewport="desktop" title="Desktop">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+        </button>
+        <button type="button" class="viewport-btn" data-viewport="tablet" title="Tablet">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <line x1="12" y1="18" x2="12" y2="18" />
+          </svg>
+        </button>
+        <button type="button" class="viewport-btn" data-viewport="mobile" title="Mobile">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="5" y="2" width="14" height="20" rx="2" />
+            <line x1="12" y1="18" x2="12" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="preview-frame">
+      <div class="preview-loading">
+        <div class="loading-spinner"></div>
+        <span>Loading preview...</span>
+      </div>
+      <iframe class="preview-iframe hidden" sandbox="allow-same-origin allow-scripts"></iframe>
+      <div class="preview-error hidden">
+        <p class="error-message">Failed to load preview</p>
+        <button type="button" class="retry-btn">Try Again</button>
+      </div>
+    </div>
+
+    <div class="preview-footer">
+      <span class="preview-stats"></span>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h3 class="settings-title">Customize Settings</h3>
+      <button type="button" class="reset-btn" title="Reset to defaults">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="1 4 1 10 7 10" />
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+        </svg>
+        Reset
+      </button>
+    </div>
+
+    <div class="settings-notice">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="16" x2="12" y2="12" />
+        <line x1="12" y1="8" x2="12.01" y2="8" />
+      </svg>
+      <p>These are temporary preview settings. Add this section to a project to save custom values.</p>
+    </div>
+
+    <form class="settings-form" data-form="library-settings">
+      {settings.length === 0 ? (
+        <div class="no-settings">
+          <p>This section has no customizable settings.</p>
+        </div>
+      ) : (
+        settings.map((setting) => {
+          const currentValue = setting.default ?? '';
+          const fieldId = `library-${setting.id}`;
+
+          return (
+            <div class="setting-field" data-setting-id={setting.id} data-setting-type={setting.type}>
+              <label for={fieldId} class="setting-label">
+                {setting.label}
+                {setting.info && <span class="setting-info">{setting.info}</span>}
+              </label>
+
+              {/* Text */}
+              {setting.type === 'text' && (
+                <input
+                  type="text"
+                  id={fieldId}
+                  name={setting.id}
+                  value={String(currentValue)}
+                  placeholder={setting.placeholder || ''}
+                  class="setting-input"
+                />
+              )}
+
+              {/* Textarea */}
+              {(setting.type === 'textarea' || setting.type === 'richtext') && (
+                <textarea
+                  id={fieldId}
+                  name={setting.id}
+                  placeholder={setting.placeholder || ''}
+                  class="setting-textarea"
+                  rows="3"
+                >{String(currentValue)}</textarea>
+              )}
+
+              {/* Checkbox */}
+              {setting.type === 'checkbox' && (
+                <label class="setting-checkbox">
+                  <input
+                    type="checkbox"
+                    id={fieldId}
+                    name={setting.id}
+                    checked={Boolean(currentValue)}
+                  />
+                  <span class="checkbox-toggle"></span>
+                  <span>Enabled</span>
+                </label>
+              )}
+
+              {/* Select */}
+              {setting.type === 'select' && (
+                <select id={fieldId} name={setting.id} class="setting-select">
+                  {setting.options?.map((option) => (
+                    <option value={option.value} selected={option.value === currentValue}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {/* Range */}
+              {setting.type === 'range' && (
+                <div class="setting-range">
+                  <input
+                    type="range"
+                    id={fieldId}
+                    name={setting.id}
+                    min={setting.min ?? 0}
+                    max={setting.max ?? 100}
+                    step={setting.step ?? 1}
+                    value={Number(currentValue)}
+                    class="range-slider"
+                  />
+                  <div class="range-display">
+                    <input
+                      type="number"
+                      class="range-value"
+                      min={setting.min ?? 0}
+                      max={setting.max ?? 100}
+                      step={setting.step ?? 1}
+                      value={Number(currentValue)}
+                    />
+                    {setting.unit && <span class="range-unit">{setting.unit}</span>}
+                  </div>
+                </div>
+              )}
+
+              {/* Color */}
+              {setting.type === 'color' && (
+                <div class="setting-color">
+                  <input
+                    type="color"
+                    id={fieldId}
+                    name={setting.id}
+                    value={String(currentValue || '#000000')}
+                    class="color-picker"
+                  />
+                  <input
+                    type="text"
+                    class="color-value"
+                    value={String(currentValue || '#000000')}
+                    pattern="^#[0-9A-Fa-f]{6}$"
+                  />
+                </div>
+              )}
+
+              {/* URL */}
+              {setting.type === 'url' && (
+                <input
+                  type="url"
+                  id={fieldId}
+                  name={setting.id}
+                  value={String(currentValue)}
+                  placeholder="https://example.com"
+                  class="setting-input"
+                />
+              )}
+            </div>
+          );
+        })
+      )}
+    </form>
+  </div>
+</div>
+
+<script>
+  class LibrarySettingsPreviewController {
+    private container: HTMLElement;
+    private sectionSlug: string;
+    private presetSlug: string | null;
+    private iframe: HTMLIFrameElement;
+    private form: HTMLFormElement;
+    private loadingEl: HTMLElement;
+    private errorEl: HTMLElement;
+    private statsEl: HTMLElement;
+    private updateTimeout: number | null = null;
+
+    constructor(container: HTMLElement) {
+      this.container = container;
+      this.sectionSlug = container.dataset.sectionSlug || '';
+      this.presetSlug = container.dataset.presetSlug || null;
+      this.iframe = container.querySelector('.preview-iframe') as HTMLIFrameElement;
+      this.form = container.querySelector('[data-form="library-settings"]') as HTMLFormElement;
+      this.loadingEl = container.querySelector('.preview-loading') as HTMLElement;
+      this.errorEl = container.querySelector('.preview-error') as HTMLElement;
+      this.statsEl = container.querySelector('.preview-stats') as HTMLElement;
+
+      this.init();
+    }
+
+    private init() {
+      // Load initial preview
+      this.loadPreview();
+
+      // Bind controls
+      this.bindViewportControls();
+      this.bindSettingsChanges();
+      this.bindResetButton();
+      this.bindRangeInputs();
+      this.bindColorInputs();
+    }
+
+    private bindViewportControls() {
+      this.container.querySelectorAll('[data-viewport]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const viewport = (btn as HTMLElement).dataset.viewport!;
+          this.setViewport(viewport);
+          this.container.querySelectorAll('[data-viewport]').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    }
+
+    private bindSettingsChanges() {
+      // Debounced preview update on any form input change
+      this.form?.addEventListener('input', () => {
+        if (this.updateTimeout) clearTimeout(this.updateTimeout);
+        this.updateTimeout = window.setTimeout(() => {
+          this.loadPreview(true);
+        }, 500);
+      });
+    }
+
+    private bindResetButton() {
+      const resetBtn = this.container.querySelector('.reset-btn');
+      resetBtn?.addEventListener('click', () => {
+        this.form?.reset();
+        this.loadPreview(true);
+      });
+    }
+
+    private bindRangeInputs() {
+      // Sync range slider with number input
+      this.container.querySelectorAll('.setting-range').forEach((rangeGroup) => {
+        const slider = rangeGroup.querySelector('.range-slider') as HTMLInputElement;
+        const numberInput = rangeGroup.querySelector('.range-value') as HTMLInputElement;
+
+        slider?.addEventListener('input', () => {
+          if (numberInput) numberInput.value = slider.value;
+        });
+
+        numberInput?.addEventListener('input', () => {
+          if (slider) slider.value = numberInput.value;
+        });
+      });
+    }
+
+    private bindColorInputs() {
+      // Sync color picker with hex input
+      this.container.querySelectorAll('.setting-color').forEach((colorGroup) => {
+        const picker = colorGroup.querySelector('.color-picker') as HTMLInputElement;
+        const textInput = colorGroup.querySelector('.color-value') as HTMLInputElement;
+
+        picker?.addEventListener('input', () => {
+          if (textInput) textInput.value = picker.value;
+        });
+
+        textInput?.addEventListener('input', () => {
+          if (picker && /^#[0-9A-Fa-f]{6}$/.test(textInput.value)) {
+            picker.value = textInput.value;
+          }
+        });
+      });
+    }
+
+    private getCustomSettings(): Record<string, unknown> {
+      const formData = new FormData(this.form);
+      const settings: Record<string, unknown> = {};
+
+      formData.forEach((value, key) => {
+        const field = this.form?.querySelector(`[name="${key}"]`) as HTMLInputElement;
+        const fieldType = field?.closest('[data-setting-type]')?.getAttribute('data-setting-type');
+
+        if (fieldType === 'checkbox') {
+          settings[key] = field.checked;
+        } else if (fieldType === 'range') {
+          settings[key] = parseFloat(value as string);
+        } else {
+          settings[key] = value;
+        }
+      });
+
+      return settings;
+    }
+
+    private async loadPreview(skipCache = false) {
+      this.showLoading();
+
+      try {
+        const customSettings = this.getCustomSettings();
+
+        const response = await fetch('/api/render/section', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sectionSlug: this.sectionSlug,
+            presetSlug: this.presetSlug,
+            customSettings,
+            skipCache,
+          }),
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+
+        if (!data.success || data.errors?.length > 0) {
+          throw new Error(data.errors?.[0] || 'Render failed');
+        }
+
+        this.renderToIframe(data.html, data.css);
+        this.updateStats(data.renderTimeMs, data.cached);
+        this.showContent();
+      } catch (error) {
+        this.showError(error instanceof Error ? error.message : 'Unknown error');
+      }
+    }
+
+    private renderToIframe(html: string, css: string) {
+      const doc = this.iframe.contentDocument!;
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    ${css}
+  </style>
+</head>
+<body>${html}</body>
+</html>`);
+      doc.close();
+    }
+
+    private setViewport(viewport: string) {
+      this.iframe.classList.remove('viewport-desktop', 'viewport-tablet', 'viewport-mobile');
+      this.iframe.classList.add(`viewport-${viewport}`);
+    }
+
+    private updateStats(renderTimeMs: number, cached: boolean) {
+      this.statsEl.textContent = `${renderTimeMs}ms${cached ? ' (cached)' : ''}`;
+    }
+
+    private showLoading() {
+      this.loadingEl.classList.remove('hidden');
+      this.iframe.classList.add('hidden');
+      this.errorEl.classList.add('hidden');
+    }
+
+    private showContent() {
+      this.loadingEl.classList.add('hidden');
+      this.iframe.classList.remove('hidden');
+      this.errorEl.classList.add('hidden');
+    }
+
+    private showError(message: string) {
+      this.loadingEl.classList.add('hidden');
+      this.iframe.classList.add('hidden');
+      this.errorEl.classList.remove('hidden');
+      const msgEl = this.errorEl.querySelector('.error-message');
+      if (msgEl) msgEl.textContent = message;
+    }
+  }
+
+  // Initialize all library settings previews
+  document.querySelectorAll('.library-settings-preview').forEach((container) => {
+    new LibrarySettingsPreviewController(container as HTMLElement);
+  });
+</script>
+
+<style>
+  .library-settings-preview {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1.5rem;
+    margin-block-start: 1.5rem;
+  }
+
+  @media (max-width: 1024px) {
+    .library-settings-preview {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Preview Panel */
+  .preview-panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-block-end: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .preview-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .preview-controls {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: #e2e8f0;
+    border-radius: 0.375rem;
+  }
+
+  .viewport-btn {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.15s;
+    display: flex;
+  }
+
+  .viewport-btn:hover {
+    color: #1e293b;
+  }
+
+  .viewport-btn.active {
+    background: white;
+    color: #2563eb;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .preview-frame {
+    position: relative;
+    block-size: 500px;
+    background: white;
+  }
+
+  .preview-iframe {
+    inline-size: 100%;
+    block-size: 100%;
+    border: none;
+    display: block;
+    transition: inline-size 0.3s ease;
+    margin-inline: auto;
+  }
+
+  .preview-iframe.viewport-tablet {
+    inline-size: 768px;
+    max-inline-size: 100%;
+  }
+
+  .preview-iframe.viewport-mobile {
+    inline-size: 375px;
+    max-inline-size: 100%;
+  }
+
+  .preview-loading,
+  .preview-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    gap: 1rem;
+  }
+
+  .loading-spinner {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 3px solid #e2e8f0;
+    border-block-start-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .preview-footer {
+    padding: 0.75rem 1rem;
+    border-block-start: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-align: end;
+  }
+
+  /* Settings Panel */
+  .settings-panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    max-block-size: 700px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-block-end: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .settings-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: #64748b;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .reset-btn:hover {
+    color: #1e293b;
+    background: #f1f5f9;
+  }
+
+  .settings-notice {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #eff6ff;
+    border-block-end: 1px solid #dbeafe;
+    color: #1e40af;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .settings-notice svg {
+    flex-shrink: 0;
+    margin-block-start: 0.125rem;
+  }
+
+  .settings-notice p {
+    margin: 0;
+  }
+
+  .settings-form {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .setting-field {
+    margin-block-end: 1.5rem;
+  }
+
+  .setting-field:last-child {
+    margin-block-end: 0;
+  }
+
+  .setting-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin-block-end: 0.5rem;
+  }
+
+  .setting-info {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #64748b;
+    margin-block-start: 0.25rem;
+  }
+
+  .setting-input,
+  .setting-textarea,
+  .setting-select {
+    inline-size: 100%;
+    padding: 0.625rem;
+    font-size: 0.875rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    background: white;
+    color: #1e293b;
+  }
+
+  .setting-input:focus,
+  .setting-textarea:focus,
+  .setting-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .setting-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+
+  .setting-checkbox input[type="checkbox"] {
+    display: none;
+  }
+
+  .checkbox-toggle {
+    position: relative;
+    inline-size: 2.5rem;
+    block-size: 1.5rem;
+    background: #cbd5e1;
+    border-radius: 9999px;
+    transition: background 0.2s;
+  }
+
+  .checkbox-toggle::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 0.125rem;
+    inset-inline-start: 0.125rem;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
+  .setting-checkbox input:checked + .checkbox-toggle {
+    background: #2563eb;
+  }
+
+  .setting-checkbox input:checked + .checkbox-toggle::after {
+    transform: translateX(1rem);
+  }
+
+  .setting-range {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .range-slider {
+    flex: 1;
+  }
+
+  .range-display {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .range-value {
+    inline-size: 4rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    text-align: center;
+  }
+
+  .range-unit {
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .setting-color {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .color-picker {
+    inline-size: 3rem;
+    block-size: 2.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  }
+
+  .color-value {
+    flex: 1;
+    padding: 0.625rem;
+    font-size: 0.875rem;
+    font-family: monospace;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+  }
+
+  .no-settings {
+    padding: 2rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .retry-btn {
+    padding: 0.5rem 1rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .retry-btn:hover {
+    background: #1d4ed8;
+  }
+
+  .error-message {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+</style>

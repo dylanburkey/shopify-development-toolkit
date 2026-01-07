@@ -158,6 +158,14 @@ const projectBlocks = blocks.filter(b => project.blocks.includes(b.data.slug));
                 >
                   Save Variant
                 </button>
+                <span class="text-gray-300">|</span>
+                <button
+                  data-section-slug={section.data.slug}
+                  data-section-name={section.data.name}
+                  class="delete-section-btn text-sm text-red-400 hover:text-red-600"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))
@@ -363,6 +371,41 @@ const projectBlocks = blocks.filter(b => project.blocks.includes(b.data.slug));
       if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
         modal.classList.add('hidden');
       }
+    });
+
+    // Handle delete section button clicks
+    document.querySelectorAll('.delete-section-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const sectionSlug = btn.dataset.sectionSlug;
+        const sectionName = btn.dataset.sectionName;
+
+        if (!confirm(`Are you sure you want to remove "${sectionName}" from this project?`)) {
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/projects/remove-section', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              projectSlug,
+              sectionSlug,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            window.location.reload();
+          } else {
+            alert(data.error || 'Failed to remove section');
+          }
+        } catch (err) {
+          alert('Network error. Please try again.');
+        }
+      });
     });
 
     // Handle form submission

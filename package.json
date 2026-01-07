@@ -21,5 +21,6 @@
     "fflate": "^0.8.2",
     "liquidjs": "^10.24.0",
     "tailwindcss": "^4.1.18"
-  }
+  },
+  "packageManager": "pnpm@10.27.0"
 }

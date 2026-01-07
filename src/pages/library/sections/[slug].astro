@@ -3,7 +3,7 @@ import Dashboard from '../../../layouts/Dashboard.astro';
 import { getCollection } from 'astro:content';
 import { getVariantInfo, listVariantsOfSection } from '../../../lib/project/promote-variant';
 import { listProjects } from '../../../lib/project/create';
-import LiquidPreviewFrame from '../../../components/liquid-preview/LiquidPreviewFrame.astro';
+import LibrarySettingsPreview from '../../../components/library/LibrarySettingsPreview.astro';
 
 const { slug } = Astro.params;
 
@@ -187,42 +187,13 @@ const liquidSchema = generateLiquidSchema(displayData);
     });
   </script>
 
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Preview Panel -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">Preview</h2>
-      </div>
-      {slug && (
-        <LiquidPreviewFrame
-          sectionSlug={slug}
-          height="320px"
-          showControls={true}
-          class="border-0 rounded-none"
-        />
-      )}
-    </div>
-
-    <!-- Settings Panel -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-semibold text-gray-900">Settings ({displayData?.settings?.length || 0})</h2>
-      </div>
-      <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
-        {displayData?.settings?.map((setting) => (
-          <div class="px-6 py-3">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="font-medium text-gray-900">{setting.label}</p>
-                <p class="text-sm text-gray-500">{setting.id}</p>
-              </div>
-              <span class="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded font-mono">{setting.type}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
+  {/* Interactive Preview with Editable Settings */}
+  {slug && displayData?.settings && (
+    <LibrarySettingsPreview
+      sectionSlug={slug}
+      settings={displayData.settings}
+    />
+  )}
 
   {/* Variants of this section */}
   {sectionVariants.length > 0 && (
